@@ -1,7 +1,6 @@
 from . import patterns
 from . import binary_decision_functions
 import numpy as np
-from tqdm.notebook import tqdm
 
 class FcaClassifier:
 
@@ -23,7 +22,6 @@ class BinarizedBinaryClassifier(FcaClassifier):
         self.alpha = alpha
 
     def compute_support(self, test):
-        print('Calculating support')
         train_pos = self.context[self.labels == True]
         train_neg = self.context[self.labels == False]
 
@@ -32,7 +30,7 @@ class BinarizedBinaryClassifier(FcaClassifier):
         negative_support = np.zeros(shape=(len(test), len(train_neg)))
         negative_counter = np.zeros(shape=(len(test), len(train_neg)))
 
-        for i in tqdm(range(len(test))):
+        for i in range(len(test)):
             intsec_pos = test[i].reshape(1, -1) & train_pos
             n_support_pos = ((intsec_pos @ (~train_pos.T)) == 0).sum(axis=1)
             n_counter_pos = ((intsec_pos @ (~train_neg.T)) == 0).sum(axis=1)
@@ -52,20 +50,19 @@ class BinarizedBinaryClassifier(FcaClassifier):
     def predict(self, test):
         self.compute_support(test)
         self.predictions = np.zeros(len(test))
-        print('Predicting')
 
         if self.method == "standard":
-            for i in tqdm(range(len(test))):
+            for i in range(len(test)):
                 self.predictions[i] = binary_decision_functions.alpha_weak(self.support[0][:,i], 
                                                                            self.support[1][:,i], 
                                                                            self.alpha)
         elif self.method == "standard-support":
-            for i in tqdm(range(len(test))):
+            for i in range(len(test)):
                 self.predictions[i] = binary_decision_functions.alpha_weak_support(self.support[0][:,i], 
                                                                                    self.support[1][:,i], 
                                                                                    self.alpha)
         elif self.method == "ratio-support":
-            for i in tqdm(range(len(test))):
+            for i in range(len(test)):
                 self.predictions[i] = binary_decision_functions.ratio_support(self.support[0][:,i], 
                                                                               self.support[1][:,i], 
                                                                               self.alpha)
